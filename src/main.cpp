@@ -6,5 +6,6 @@ int main() {
 
   while(1) {
     // put your main code here, to run repeatedly:
+    int a = 10;
   }
 }
