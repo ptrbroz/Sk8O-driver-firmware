@@ -1,12 +1,12 @@
 #ifndef FOC_H
 #define FOC_H
 
-#include "../structs.h"
+#include "structs.h"
 #include "PositionSensor.h"
 #include "mbed.h"
 #include "hw_config.h"
 #include "math.h"
-#include "../math_ops.h"
+#include "math_ops.h"
 #include "motor_config.h"
 #include "current_controller_config.h"
 #include "FastMath.h"
