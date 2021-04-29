@@ -2,7 +2,7 @@
  
 Firmware for Sk8O motor driver - a new bldc driver board inspired by Ben Katz's HKC Driver Integrated.
 
-The goals of this repostory is the adaptation of Martin Gurtner's firmware (for HKC Driver) to:
+The goal of this repostory is the adaptation of Martin Gurtner's firmware (for HKC Driver) to:
 
 * Use STM32G474RET6 (instead of STM32F446RE which was used in HKC)
 * Adapt to different pinout in Sk80 driver board
