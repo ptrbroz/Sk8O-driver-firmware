@@ -1,4 +1,4 @@
-# Sk80-driver-firmware
+# Sk8O-driver-firmware
  
 Firmware for Sk8O motor driver - a new bldc driver board inspired by Ben Katz's HKC Driver Integrated.
 
