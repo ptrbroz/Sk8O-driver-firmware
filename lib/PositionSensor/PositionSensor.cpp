@@ -1,7 +1,7 @@
 
 #include "mbed.h"
 #include "PositionSensor.h"
-#include "../math_ops.h"
+#include "math_ops.h"
 //#include "offset_lut.h"
 //#include <math.h>
 

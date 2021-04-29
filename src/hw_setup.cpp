@@ -7,8 +7,8 @@
 
 void Init_PWM(GPIOStruct *gpio){
 
-    RCC->AHB1ENR |= RCC_AHB1ENR_GPIOCEN;                        // enable the clock to GPIOC
-    RCC->APB1ENR |= 0x00000001;                                 // enable TIM2 clock
+    RCC->AHB2ENR |= RCC_AHB2ENR_GPIOCEN;                        // enable the clock to GPIOC
+    RCC->APB1ENR1 |= RCC_APB1ENR1_TIM2EN;                       // enable TIM2 clock
     RCC->APB2ENR |= RCC_APB2ENR_TIM1EN;                         // enable TIM1 clock
 
     GPIOC->MODER |= (1 << 10);                                  // set pin 5 to be general purpose output for LED
@@ -41,12 +41,11 @@ void Init_PWM(GPIOStruct *gpio){
 
 void Init_ADC(void){
     // ADC Setup
-     RCC->APB2ENR |= RCC_APB2ENR_ADC3EN;                        // clock for ADC3
-     RCC->APB2ENR |= RCC_APB2ENR_ADC2EN;                        // clock for ADC2
-     RCC->APB2ENR |= RCC_APB2ENR_ADC1EN;                        // clock for ADC1
+     RCC->AHB2ENR |= RCC_AHB2ENR_ADC345EN;                                   // clock for ADC3 & 4 & 5
+     RCC->APB2ENR |= RCC_AHB2ENR_ADC12EN;                                   // clock for ADC1 & 2                     
      
-     RCC->AHB1ENR |= RCC_AHB1ENR_GPIOCEN;                        // Enable clock for GPIOC
-     RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;                        // Enable clock for GPIOA
+     RCC->AHB2ENR |= RCC_AHB2ENR_GPIOCEN;                         // Enable clock for GPIOC
+     RCC->AHB2ENR |= RCC_AHB2ENR_GPIOAEN;                        // Enable clock for GPIOA
     
      ADC->CCR = 0x00000016;                                     // Regular simultaneous mode only
      ADC1->CR2 |= ADC_CR2_ADON;//0x00000001;                    // ADC1 ON

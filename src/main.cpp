@@ -4,6 +4,7 @@
 /// Written for the STM32F446, but can be implemented on other STM32 MCU's with some further register-diddling
 /// Version for the TI DRV8323 Everything Chip
 
+
 #define REST_MODE           0
 #define CALIBRATION_MODE    1
 #define MOTOR_MODE          2
