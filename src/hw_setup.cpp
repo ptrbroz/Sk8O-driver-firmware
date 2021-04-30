@@ -21,7 +21,7 @@ void Init_PWM(GPIOStruct *gpio){
     
      //ISR Setup     
     
-    NVIC_EnableIRQ(TIM1_UP_TIM10_IRQn);                         //Enable TIM1 IRQ
+    NVIC_EnableIRQ(TIM1_UP_TIM16_IRQn);                         //Enable TIM1 IRQ
 
     TIM1->DIER |= TIM_DIER_UIE;                                 // enable update interrupt
     TIM1->CR1 = 0x40;                                           // CMS = 10, interrupt only when counting up
@@ -41,19 +41,38 @@ void Init_PWM(GPIOStruct *gpio){
 
 void Init_ADC(void){
     // ADC Setup
-     RCC->AHB2ENR |= RCC_AHB2ENR_ADC345EN;                                   // clock for ADC3 & 4 & 5
-     RCC->APB2ENR |= RCC_AHB2ENR_ADC12EN;                                   // clock for ADC1 & 2                     
+     RCC->AHB2ENR |= RCC_AHB2ENR_ADC345EN;                       // clock for ADC3 & 4 & 5
+     RCC->APB2ENR |= RCC_AHB2ENR_ADC12EN;                        // clock for ADC1 & 2                     
      
      RCC->AHB2ENR |= RCC_AHB2ENR_GPIOCEN;                         // Enable clock for GPIOC
      RCC->AHB2ENR |= RCC_AHB2ENR_GPIOAEN;                        // Enable clock for GPIOA
-    
-     ADC->CCR = 0x00000016;                                     // Regular simultaneous mode only
-     ADC1->CR2 |= ADC_CR2_ADON;//0x00000001;                    // ADC1 ON
-     ADC1->SQR3 = 0x000000A;                                    // use PC_0 as input- ADC1_IN0
-     ADC2->CR2 |= ADC_CR2_ADON;//0x00000001;                    // ADC2 ON
-     ADC2->SQR3 = 0x0000000B;                                   // use PC_1 as input - ADC2_IN11
-     ADC3->CR2 |= ADC_CR2_ADON;                                 // ADC3 ON
-     ADC3->SQR3 = 0x00000000;                                   // use PA_0, - ADC3_IN0
+         
+     ADC12_COMMON->CCR |= 0x00000006;                           // Regular simultaneous mode only
+     ADC345_COMMON->CCR |= 0x00000006;                          // Regular simultaneous mode only
+
+     ADC1->CR &= ~ADC_CR_DEEPPWD; //clear Deep-power-down enable bit
+     ADC2->CR &= ~ADC_CR_DEEPPWD;
+     ADC3->CR &= ~ADC_CR_DEEPPWD;
+
+     ADC1->CR |= ADC_CR_ADVREGEN; // enable ADC voltage regulator 
+     ADC2->CR |= ADC_CR_ADVREGEN;
+     ADC3->CR |= ADC_CR_ADVREGEN;
+
+     wait_us(LL_ADC_DELAY_INTERNAL_REGUL_STAB_US); //wait for regulator start-up time
+
+     ADC1->ISR |= ADC_ISR_ADRDY; //clear adrdy bits [sic, it is cleared by writing a '1' according to ref. manual]
+     ADC2->ISR |= ADC_ISR_ADRDY;
+     ADC3->ISR |= ADC_ISR_ADRDY;
+
+     ADC1->CR |= ADC_CR_ADEN;
+     ADC2->CR |= ADC_CR_ADEN;
+     ADC3->CR |= ADC_CR_ADEN;
+
+
+
+     ADC1->SQR3 = 0x0000006;                                    // use PC_0 as input- ADC1_IN6
+     ADC2->SQR3 = 0x00000007;                                   // use PC_1 as input - ADC2_IN7
+     ADC3->SQR3 = 0x00000000;                                   // use PA_0, - ADC3_IN1
      GPIOC->MODER |= 0x0000000f;                                // Alternate function, PC_0, PC_1 are analog inputs 
      GPIOA->MODER |= 0x3;                                       // PA_0 as analog input
      
@@ -61,7 +80,7 @@ void Init_ADC(void){
      ADC2->SMPR1 |= 0x8;                                        // 15 cycles on CH_11, 0b 0001 000
      ADC3->SMPR2 |= 0x1;                                        // 15 cycles on CH_0, 0b 001;
 
-
+    
 
     }
 
