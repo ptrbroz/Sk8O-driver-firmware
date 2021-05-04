@@ -8,7 +8,7 @@ __IO uint32_t* getChannel(TIM_TypeDef* pwm, PinName pin) {
         // Channels 1N
         case PA_1: case PA_5: case PB_6: case PB_3: case PA_13: case PB_7: case PC_13:
             return &pwm->CCR1;
-            
+                
         // Channels 2
         case PC_1: case PA_7: case PC_7: case PA_9: case PA_3: case PA_14:
         // Channels 2N

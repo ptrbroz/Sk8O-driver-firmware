@@ -7,7 +7,8 @@
 
 typedef struct{
     DigitalOut *enable;
-    DigitalOut *led;
+    DigitalOut *led1;
+    DigitalOut *led2;
     FastPWM *pwm_u, *pwm_v, *pwm_w;
     } GPIOStruct;
     

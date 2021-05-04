@@ -5,7 +5,8 @@
 #define PIN_V PA_9
 #define PIN_W PA_8
 #define ENABLE_PIN PA_11        // Enable gate drive pin
-#define LED         PC_5        // LED Pin
+#define LED_1         PC_2        // LED Pin
+#define LED_2         PC_3        // LED Pin
 #define I_SCALE 0.02014160156f  // Amps per A/D Count
 #define V_SCALE 0.012890625f     // Bus volts per A/D Count
 #define DTC_MAX 0.94f          // Max phase duty cycle

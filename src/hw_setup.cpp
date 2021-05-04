@@ -11,7 +11,9 @@ void Init_PWM(GPIOStruct *gpio){
     RCC->APB1ENR1 |= RCC_APB1ENR1_TIM2EN;                       // enable TIM2 clock
     RCC->APB2ENR |= RCC_APB2ENR_TIM1EN;                         // enable TIM1 clock
 
-    GPIOC->MODER |= (1 << 10);                                  // set pin 5 to be general purpose output for LED
+    GPIOC->MODER |= (1 << (2*2));                               // set pin c2,c3 to be general purpose output for LED
+    GPIOC->MODER |= (1 << (3*2));                  
+
     gpio->enable = new DigitalOut(ENABLE_PIN);
     gpio->pwm_u = new FastPWM(PIN_U);
     gpio->pwm_v = new FastPWM(PIN_V);
@@ -46,6 +48,7 @@ void Init_ADC(void){
      
      RCC->AHB2ENR |= RCC_AHB2ENR_GPIOCEN;                         // Enable clock for GPIOC
      RCC->AHB2ENR |= RCC_AHB2ENR_GPIOAEN;                        // Enable clock for GPIOA
+     RCC->AHB2ENR |= RCC_AHB2ENR_GPIOBEN;
          
      ADC12_COMMON->CCR |= 0x00000006;                           // Regular simultaneous mode only
      ADC345_COMMON->CCR |= 0x00000006;                          // Regular simultaneous mode only
@@ -72,28 +75,23 @@ void Init_ADC(void){
 
      ADC1->SQR3 = 0x0000006;                                    // use PC_0 as input- ADC1_IN6
      ADC2->SQR3 = 0x00000007;                                   // use PC_1 as input - ADC2_IN7
-     ADC3->SQR3 = 0x00000000;                                   // use PA_0, - ADC3_IN1
+     ADC3->SQR3 = 0x0000000C;                                   // use PB_0, - ADC3_IN12
      GPIOC->MODER |= 0x0000000f;                                // Alternate function, PC_0, PC_1 are analog inputs 
-     GPIOA->MODER |= 0x3;                                       // PA_0 as analog input
+     GPIOB->MODER |= 0x3;                                       // PB_0 as analog input
      
-     ADC1->SMPR1 |= 0x1;                                        // 15 cycles on CH_10, 0b 001
-     ADC2->SMPR1 |= 0x8;                                        // 15 cycles on CH_11, 0b 0001 000
-     ADC3->SMPR2 |= 0x1;                                        // 15 cycles on CH_0, 0b 001;
+     ADC1->SMPR1 |= (3 << (6*3));                                  // 24.5 cycles on CH_6 
+     ADC2->SMPR1 |= (3 << (7*3));                                  // 24.5 cycles on CH_7
+     ADC3->SMPR2 |= (7 << (2*3));                                  // 640 cycles on CH_12 (Increased due to scaled-up voltage divider)
 
     
 
     }
 
-void Init_DAC(void){
-     RCC->APB1ENR |= 0x20000000;                                // Enable clock for DAC
-     DAC->CR |= 0x00000001;                                     // DAC control reg, both channels ON
-     GPIOA->MODER |= 0x00000300;                                // PA04 as analog output  
-    }
 
 void Init_All_HW(GPIOStruct *gpio){
     Init_PWM(gpio);
     Init_ADC();
-    gpio->led = new DigitalOut(LED);
-    //Init_DAC();
+    gpio->led1 = new DigitalOut(LED_1);
+    gpio->led2 = new DigitalOut(LED_2);
     
     }

@@ -28,7 +28,7 @@ int __int_reg[256];                                                             
 #include "current_controller_config.h"
 #include "hw_config.h"
 #include "motor_config.h"
-#include "stm32f4xx_flash.h"
+//#include "stm32f4xx_flash.h"
 #include "FlashWriter.h"
 #include "user_config.h"
 #include "PreferenceWriter.h"
