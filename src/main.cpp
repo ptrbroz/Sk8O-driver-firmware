@@ -29,11 +29,10 @@ int __int_reg[256];                                                             
 #include "hw_config.h"
 #include "motor_config.h"
 //#include "stm32f4xx_flash.h"
-#include "FlashWriter.h"
 #include "user_config.h"
-#include "PreferenceWriter.h"
 #include "CAN_com.h"
 #include "DRV.h"
+#include "FlashAccess.h"
  
 PreferenceWriter prefs(6);
 

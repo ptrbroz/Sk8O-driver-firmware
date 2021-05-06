@@ -4,7 +4,7 @@
 
 #include "calibration.h"
 #include "foc.h"
-#include "PreferenceWriter.h"
+#include "FlashAccess.h"
 #include "user_config.h"
 #include "motor_config.h"
 #include "current_controller_config.h"
@@ -238,10 +238,11 @@ void calibrate(PositionSensor *ps, GPIOStruct *gpio, ControllerStruct *controlle
         //for(int i = 0; i<128; i++){printf("%d\n\r", __int_reg[i]);}
         //printf("\n\r %d \n\r", sizeof(lut));
 
+        saveToFlash();
         
-        if (!prefs->ready()) prefs->open();
-        prefs->flush();                                                         // write offset and lookup table to flash
-        prefs->close();
+        //if (!prefs->ready()) prefs->open();
+        //prefs->flush();                                                         // write offset and lookup table to flash
+        //prefs->close();
         
         delete[] error_f;       //gotta free up that ram
         delete[] error_b;

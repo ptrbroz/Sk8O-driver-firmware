@@ -4,7 +4,7 @@
 #include "foc.h"
 #include "mbed.h"
 #include "PositionSensor.h"
-#include "PreferenceWriter.h"
+#include "FlashAccess.h"
 #include "user_config.h"
 
 #define V_CAL 0.15f;

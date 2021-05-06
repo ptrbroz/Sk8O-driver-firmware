@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "new": "cpp",
+        "stm32g4xx_hal_flash.h": "c",
+        "stm32g4xx_hal_flash_ex.h": "c",
+        "user_config.h": "c"
+    }
+}
