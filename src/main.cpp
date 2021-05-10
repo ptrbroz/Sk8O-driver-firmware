@@ -28,14 +28,16 @@ int __int_reg[256];                                                             
 #include "current_controller_config.h"
 #include "hw_config.h"
 #include "motor_config.h"
+#include "stm32g4xx.h"
 //#include "stm32f4xx_flash.h"
-#include "FlashWriter.h"
+//#include "FlashWriter.h"
 #include "user_config.h"
-#include "PreferenceWriter.h"
+//#include "PreferenceWriter.h"
 #include "CAN_com.h"
 #include "DRV.h"
+#include "FlashAccess.h"
  
-PreferenceWriter prefs(6);
+//PreferenceWriter prefs(6);
 
 GPIOStruct gpio;
 ControllerStruct controller;
@@ -153,8 +155,8 @@ void calibrate(void){
     drv.enable_gd();
     //gpio.enable->write(1);
     gpio.led->write(1);                                                    // Turn on status LED
-    order_phases(&spi, &gpio, &controller, &prefs);                             // Check phase ordering
-    calibrate(&spi, &gpio, &controller, &prefs);                                // Perform calibration procedure
+    order_phases(&spi, &gpio, &controller);                             // Check phase ordering
+    calibrate(&spi, &gpio, &controller);                                // Perform calibration procedure
     gpio.led->write(0);;                                                     // Turn off status LED
     wait(.05);
     R_NOMINAL = 0;
@@ -246,9 +248,10 @@ extern "C" void TIM1_UP_TIM10_IRQHandler(void) {
                     {
                         printf("Saving winding resistance\n\r");
                         R_NOMINAL = observer.resistance;
-                        if (!prefs.ready()) prefs.open();
+                        saveToFlash();
+                        /*if (!prefs.ready()) prefs.open();
                         prefs.flush();                                                         // write offset and lookup table to flash
-                        prefs.close();
+                        prefs.close();*/
                     }
                     //for(int i = 0; i<1000; i++){printf("%f \n\r", testing[i]);}
                 }
@@ -354,10 +357,12 @@ void serial_interrupt(void){
                     spi.Sample(DT);
                     wait_us(20);
                     M_OFFSET = spi.GetMechPosition();
-                    if (!prefs.ready()) prefs.open();
+                    saveToFlash();
+                    /*if (!prefs.ready()) prefs.open();
                         prefs.flush();                                                  // Write new prefs to flash
-                        prefs.close();    
-                        prefs.load(); 
+                        prefs.close(); 
+                        prefs.load(); */
+                    loadFromFlash();
                     spi.SetMechOffset(M_OFFSET);
                     printf("\n\r  Saved new zero position:  %.4f\n\r\n\r", M_OFFSET);
                     
@@ -395,12 +400,15 @@ void serial_interrupt(void){
                     default:
                         printf("\n\r '%c' Not a valid command prefix\n\r\n\r", cmd_id);
                         break;
-                    }
-                    
+                    } 
+                /*
                 if (!prefs.ready()) prefs.open();
                 prefs.flush();                                                  // Write new prefs to flash
                 prefs.close();    
-                prefs.load();                                              
+                prefs.load();
+                */  
+                saveToFlash();   
+                loadFromFlash();                                         
                 state_change = 1;
                 char_count = 0;
                 cmd_id = 0;
@@ -472,7 +480,8 @@ int main() {
                                    // attach 'CAN receive-complete' interrupt handler    
     
     // If preferences haven't been user configured yet, set defaults 
-    prefs.load();                                                               // Read flash
+    //prefs.load(); 
+    loadFromFlash();                                                              // Read flash
     can.filter(CAN_ID , 0xFFF, CANStandard, 0);                                                         
     txMsg.id = CAN_MASTER;
     txMsg.len = 6;

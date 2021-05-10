@@ -2,7 +2,7 @@
 #define STRUCTS_H
 
 #include "mbed.h"
-#include "FastPWM.h"
+#include "../lib/FastPWM/FastPWM.h"
 
 
 typedef struct{
