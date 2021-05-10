@@ -149,3 +149,28 @@ __IO uint32_t* getChannel(TIM_TypeDef* pwm, PinName pin) {
     return NULL;
 }
 #endif
+
+//barebones for now, only checked for used pins. More pins can be added from device datasheet
+#if defined TARGET_NUCLEO_G474RE
+__IO uint32_t* getChannel(TIM_TypeDef* pwm, PinName pin) {
+    switch (pin) {
+        // Channels 1 : PWMx/1
+        case PA_8: 
+            return &pwm->CCR1;
+        
+        // Channels 2 : PWMx/2
+        case PA_9:
+            return &pwm->CCR2;
+            
+        // Channels 3 : PWMx/3
+        case PA_10:  
+            return &pwm->CCR3;
+ 
+        // Channels 4 : PWMx/4
+        //case PA_11: case PC_9: 
+        //    return &pwm->CCR4;
+    }
+    return NULL;
+}
+
+#endif
