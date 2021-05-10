@@ -1,5 +1,6 @@
 
 #include "foc.h"
+#include "mbed.h"
 using namespace FastMath;
 
 
@@ -63,8 +64,8 @@ void zero_current(int *offset_1, int *offset_2){                                
         TIM1->CCR3 = (PWM_ARR>>1)*(1.0f);                                               // Write duty cycles
         TIM1->CCR2 = (PWM_ARR>>1)*(1.0f);
         TIM1->CCR1 = (PWM_ARR>>1)*(1.0f);
-        ADC1->CR2  |= 0x40000000;                                               // Begin sample and conversion
-        wait(.001);
+        ADC1->CR  |= ADC_CR_ADSTART;                                               // Begin sample and conversion
+        wait_us(1000);
         adc2_offset += ADC2->DR;
         adc1_offset += ADC1->DR;
         }

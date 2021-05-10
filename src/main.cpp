@@ -43,7 +43,8 @@ GPIOStruct gpio;
 ControllerStruct controller;
 ObserverStruct observer;
 COMStruct com;
-Serial pc(PA_2, PA_3);
+
+UnbufferedSerial pc(PA_2, PA_3);
 
 
 CAN          can(PB_8, PB_9, 1000000);      // CAN Rx pin name, CAN Tx pin name
@@ -58,7 +59,7 @@ DRV832x drv(&drv_spi, &drv_cs);
 
 PositionSensorAM5147 spi(16384, 0.0, NPP);  
 
-volatile int count = 0;
+volatile int count_sm = 0; //state machine counter. Renamed from count to avoid conflict
 volatile int state = REST_MODE;
 volatile int state_change;
 
@@ -66,7 +67,7 @@ void onMsgReceived() {
     //msgAvailable = true;
     //printf("%d\n\r", rxMsg.id);
     can.read(rxMsg);  
-    if((rxMsg.id == CAN_ID)){
+    if(((int)rxMsg.id == CAN_ID)){
         controller.timeout = 0;
         if(((rxMsg.data[0]==0xFF) & (rxMsg.data[1]==0xFF) & (rxMsg.data[2]==0xFF) & (rxMsg.data[3]==0xFF) & (rxMsg.data[4]==0xFF) & (rxMsg.data[5]==0xFF) & (rxMsg.data[6]==0xFF) & (rxMsg.data[7]==0xFC))){
             state = MOTOR_MODE;
@@ -75,7 +76,7 @@ void onMsgReceived() {
         else if(((rxMsg.data[0]==0xFF) & (rxMsg.data[1]==0xFF) & (rxMsg.data[2]==0xFF) & (rxMsg.data[3]==0xFF) * (rxMsg.data[4]==0xFF) & (rxMsg.data[5]==0xFF) & (rxMsg.data[6]==0xFF) & (rxMsg.data[7]==0xFD))){
             state = REST_MODE;
             state_change = 1;
-            gpio.led->write(0);; 
+            gpio.led1->write(0);; 
             }
         else if(((rxMsg.data[0]==0xFF) & (rxMsg.data[1]==0xFF) & (rxMsg.data[2]==0xFF) & (rxMsg.data[3]==0xFF) * (rxMsg.data[4]==0xFF) & (rxMsg.data[5]==0xFF) & (rxMsg.data[6]==0xFF) & (rxMsg.data[7]==0xFE))){
             spi.ZeroPosition();
@@ -109,7 +110,7 @@ void enter_menu_state(void){
     printf(" esc - Exit to Menu\n\r");
     wait_us(10);
     state_change = 0;
-    gpio.led->write(0);
+    gpio.led1->write(0);
     }
 
 void enter_setup_state(void){
@@ -143,10 +144,10 @@ void enter_torque_mode(void){
     //gpio.enable->write(1);
     controller.ovp_flag = 0;
     reset_foc(&controller);                                                     // Tesets integrators, and other control loop parameters
-    wait(.001);
+    wait_us(1000);
     controller.i_d_ref = 0;
     controller.i_q_ref = 0;                                                     // Current Setpoints
-    gpio.led->write(1);                                                     // Turn on status LED
+    gpio.led1->write(1);                                                     // Turn on status LED
     state_change = 0;
     printf("\n\r Entering Motor Mode \n\r");
     }
@@ -154,11 +155,11 @@ void enter_torque_mode(void){
 void calibrate(void){
     drv.enable_gd();
     //gpio.enable->write(1);
-    gpio.led->write(1);                                                    // Turn on status LED
+    gpio.led1->write(1);                                                    // Turn on status LED
     order_phases(&spi, &gpio, &controller);                             // Check phase ordering
     calibrate(&spi, &gpio, &controller);                                // Perform calibration procedure
-    gpio.led->write(0);;                                                     // Turn off status LED
-    wait(.05);
+    gpio.led1->write(0);;                                                     // Turn off status LED
+    wait_us(50000);
     R_NOMINAL = 0;
     state = INIT_TEMP_MODE;
     //printf("\n\r Calibration complete.  Press 'esc' to return to menu\n\r");
@@ -171,7 +172,7 @@ void print_encoder(void){
     printf(" Mechanical Angle:  %f    Electrical Angle:  %f    Raw:  %d\n\r", spi.GetMechPosition(), spi.GetElecPosition(), spi.GetRawPosition());
 //    printf("%f \n\r", spi.GetMechVelocity());
     //printf("%d\n\r", spi.GetRawPosition());
-    wait(.001);
+    wait_us(1000);
     }
 
 /// Current Sampling Interrupt ///
@@ -180,16 +181,17 @@ void print_encoder(void){
 //float testing2[1000];
 extern "C" void TIM1_UP_TIM10_IRQHandler(void) {
   if (TIM1->SR & TIM_SR_UIF ) {
-        //gpio.led->write(1);
+        //gpio.led1->write(1);
         ///Sample current always ///
-        ADC1->CR2  |= 0x40000000;                                               // Begin sample and conversion
+        //ADC1->CR2  |= 0x40000000;     
+        ADC1->CR  |= ADC_CR_ADSTART;                                           // Begin sample and conversion
         //volatile int delay;   
         //for (delay = 0; delay < 55; delay++);
         
         spi.Sample(DT);                                                           // sample position sensor
         /*
-        if(count < 10){printf("%d\n\r", spi.GetRawPosition());}
-        count ++;
+        if(count_sm < 10){printf("%d\n\r", spi.GetRawPosition());}
+        count_sm ++;
         */        
         controller.adc2_raw = ADC2->DR;                                         // Read ADC Data Registers
         controller.adc1_raw = ADC1->DR;
@@ -221,25 +223,25 @@ extern "C" void TIM1_UP_TIM10_IRQHandler(void) {
             case INIT_TEMP_MODE:
                 if(state_change){
                     enter_torque_mode();
-                    count = 0;
+                    count_sm = 0;
                     observer.resistance = 0.0f;
                     } 
                 controller.i_d_ref = -10.0f;
                 controller.i_q_ref = 0.0f;
                 commutate(&controller, &observer, &gpio, controller.theta_elec); 
 
-                if(count > 200)
+                if(count_sm > 200)
                 {
                     float r_meas = controller.v_d*(DTC_MAX-DTC_MIN)/(controller.i_d*SQRT3);
-                    //testing2[count-100] = controller.i_d;
+                    //testing2[count_sm-100] = controller.i_d;
                     observer.resistance += .001f*r_meas;
                 }
-                if(count > 1200)
+                if(count_sm > 1200)
                 {
-                    count = 0;
+                    count_sm = 0;
                     state = REST_MODE;
                     state_change = 1;
-                    gpio.led->write(0);
+                    gpio.led1->write(0);
                     observer.temperature = (double)(T_AMBIENT + ((observer.resistance/R_NOMINAL) - 1.0f)*254.5f);
                     printf("Winding Resistance:  %f\n\r", observer.resistance);
                     printf("Winding Temperature:  %f\n\r", observer.temperature);
@@ -256,12 +258,12 @@ extern "C" void TIM1_UP_TIM10_IRQHandler(void) {
                     //for(int i = 0; i<1000; i++){printf("%f \n\r", testing[i]);}
                 }
                 
-                count++; 
+                count_sm++; 
                 break;
             case MOTOR_MODE:                                                   // Run torque control
                 if(state_change){
                     enter_torque_mode();
-                    count = 0;
+                    count_sm = 0;
                     }
                 else{
                 /*
@@ -293,10 +295,10 @@ extern "C" void TIM1_UP_TIM10_IRQHandler(void) {
                 { 
                     state = REST_MODE;
                     state_change = 1;
-                    gpio.led->write(0);
+                    gpio.led1->write(0);
                 }
                 
-                count++; 
+                count_sm++; 
                 }   
                 
                   
@@ -312,7 +314,7 @@ extern "C" void TIM1_UP_TIM10_IRQHandler(void) {
                 break;
                 }                 
       }
-      //gpio.led->write(0);
+      //gpio.led1->write(0);
   TIM1->SR = 0x0;                                                               // reset the status register
 }
 
@@ -325,13 +327,14 @@ char char_count = 0;
 /// Called when data received over serial ///
 void serial_interrupt(void){
     while(pc.readable()){
-        char c = pc.getc();
+        char c;
+        pc.read(&c, 1);
         if(c == 27){
                 state = REST_MODE;
                 state_change = 1;
                 char_count = 0;
                 cmd_id = 0;
-                gpio.led->write(0);;
+                gpio.led1->write(0);;
                 for(int i = 0; i<8; i++){cmd_val[i] = 0;}
                 }
         if(state == REST_MODE){
@@ -420,7 +423,7 @@ void serial_interrupt(void){
                     cmd_val[char_count-1] = c;
                     
                 }
-                pc.putc(c);
+                pc.write(&c, 1);
                 char_count++;
                 }
             }
@@ -475,8 +478,8 @@ int main() {
     //TIM1->CR1 |= TIM_CR1_UDIS; //enable interrupt
     
     wait_us(100);
-    NVIC_SetPriority(TIM1_UP_TIM10_IRQn, 2);                                             // commutation > communication
-    NVIC_SetPriority(CAN1_RX0_IRQn, 3);
+    NVIC_SetPriority(TIM1_UP_TIM16_IRQn, 2);                                             // commutation > communication
+    NVIC_SetPriority(FDCAN2_IT0_IRQn, 3);
                                    // attach 'CAN receive-complete' interrupt handler    
     
     // If preferences haven't been user configured yet, set defaults 
@@ -511,10 +514,10 @@ int main() {
     init_controller_params(&controller);
     
 
-    pc.baud(921600);                                                            // set serial baud rate
-    wait(.01);
-    pc.printf("\n\r\n\r HobbyKing Cheetah\n\r\n\r");
-    wait(.01);
+    pc.baud(921600);    
+    wait_us(10000);                                                        // set serial baud rate
+    printf("\n\r\n\r HobbyKing Cheetah\n\r\n\r");
+    wait_us(10000);
     printf("\n\r Debug Info:\n\r");
     printf(" Firmware Version: %s\n\r", VERSION_NUM);
     printf(" ADC1 Offset: %d    ADC2 Offset: %d\n\r", controller.adc1_offset, controller.adc2_offset);
@@ -529,16 +532,16 @@ int main() {
     pc.attach(&serial_interrupt);                                               // attach serial interrupt
 
 
-    int counter = 0;
+    //int counter = 0;
     while(1) {
         //drv.print_faults();
-        wait(.1);
+        wait_us(100000);
         //printf("%.3f  %.3f\n\r" , observer.temperature, observer.q_in);
-        if(controller.otw_flag){gpio.led->write(!gpio.led->read());}
+        if(controller.otw_flag){gpio.led1->write(!gpio.led1->read());}
              /*
         if(state == MOTOR_MODE)
         {
-            if(controller.otw_flag){gpio.led->write(!gpio.led->read());}
+            if(controller.otw_flag){gpio.led1->write(!gpio.led1->read());}
             //printf("%f  %f\n\r", controller.dtheta_mech, controller.i_d_ref);
             //printf("%.3f  %.3f  %.3f\n\r", (float)observer.temperature, (float)observer.temperature2, observer.resistance);
             //printf("%.3f  %.3f  %.3f %.3f %.3f\n\r", controller.v_d, controller.v_q, controller.i_d_filt, controller.i_q_filt, controller.dtheta_elec);

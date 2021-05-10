@@ -2,6 +2,15 @@
     "files.associations": {
         "stm32g4xx.h": "c",
         "stm32g4xx_hal.h": "c",
-        "stm32g4xx_hal_conf.h": "c"
+        "stm32g4xx_hal_conf.h": "c",
+        "bit": "cpp",
+        "chrono": "cpp",
+        "condition_variable": "cpp",
+        "algorithm": "cpp",
+        "istream": "cpp",
+        "limits": "cpp",
+        "mutex": "cpp",
+        "streambuf": "cpp",
+        "thread": "cpp"
     }
 }
