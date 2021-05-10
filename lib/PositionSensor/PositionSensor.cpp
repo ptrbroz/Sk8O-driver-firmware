@@ -197,7 +197,7 @@ PositionSensorEncoder::PositionSensorEncoder(int CPR, float offset, int ppairs) 
     //ZPulse = new InterruptIn(PB_0);
     //ZSense = new DigitalIn(PB_0);
     ZPulse->enable_irq();
-    ZPulse->rise(this, &PositionSensorEncoder::ZeroEncoderCount);
+    ZPulse->rise(callback(this, &PositionSensorEncoder::ZeroEncoderCount));
     //ZPulse->fall(this, &PositionSensorEncoder::ZeroEncoderCountDown);
     ZPulse->mode(PullDown);
     flag = 0;
