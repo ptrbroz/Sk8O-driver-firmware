@@ -160,7 +160,7 @@ void calibrate(PositionSensor *ps, GPIOStruct *gpio, ControllerStruct *controlle
        for(int j = 0; j<n2; j++){
        theta_ref -= delta;
        abc(theta_ref, v_d, v_q, &v_u, &v_v, &v_w);                              // inverse dq0 transform on voltages
-       svm(1.0, v_u, v_v, v_w, 0, &dtc_u, &dtc_v, &dtc_w);                         // space vector modulation
+       svm(1.0, v_u, v_v, v_w, 0, &dtc_u, &dtc_v, &dtc_w);                      // space vector modulation
         TIM1->CCR3 = (PWM_ARR>>1)*(1.0f-dtc_u);
         if(PHASE_ORDER){
             TIM1->CCR2 = (PWM_ARR>>1)*(1.0f-dtc_v);

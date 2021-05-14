@@ -465,7 +465,7 @@ int main() {
     wait_us(100);
     drv.write_CSACR(0x0, 0x1, 0x0, CSA_GAIN_40, 0x1, 0x0, 0x0, 0x0, SEN_LVL_1_0);
     wait_us(100);
-    drv.write_OCPCR(TRETRY_50US, DEADTIME_50NS, OCP_NONE, OCP_DEG_8US, VDS_LVL_1_88);
+    drv.write_OCPCR(TRETRY_50US, DEADTIME_50NS, OCP_NONE, OCP_DEG_8US, VDS_LVL_1_50); //VDS down to 1.5V from original 1.88. Still seems pretty high? (VDS monitor trip @ hundreads of amps current??)
     
     //drv.enable_gd();
     drv.disable_gd();

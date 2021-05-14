@@ -1,6 +1,6 @@
 
 /*
-Utils meant to replace Ben Katz's original FlashWriter/PreferenceWriter libraries (which cannot be ported as they use a 
+Utils meant to replace Ben Katz's original FlashWriter/PreferenceWriter libraries (which cannot be easily ported as they use a 
 non-HAL flash library not available on STM32G474RET6). 
 
 Purpose: facilitate reading/writing callibration data between flash memory and global variables declared in user_config.h
