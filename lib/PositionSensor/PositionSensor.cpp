@@ -192,7 +192,7 @@ PositionSensorEncoder::PositionSensorEncoder(int CPR, float offset, int ppairs) 
     TIM2->CR1 = 0x01;                                                       //CEN,  enable timer
     
     TIM3->CR1   = 0x01;                                                     // CEN
-    ZPulse = new InterruptIn(PC_4);
+    ZPulse = new InterruptIn(PC_4); //PB: this pin is not connected in pcb... but neither is it (or PB_0) in Ben's original, so... no worries I guess?
     ZSense = new DigitalIn(PC_4);
     //ZPulse = new InterruptIn(PB_0);
     //ZSense = new DigitalIn(PB_0);

@@ -29,16 +29,12 @@ int __int_reg[256];                                                             
 #include "hw_config.h"
 #include "motor_config.h"
 #include "stm32g4xx.h"
-//#include "stm32f4xx_flash.h"
-//#include "FlashWriter.h"
 #include "user_config.h"
-//#include "PreferenceWriter.h"
 #include "CAN_com.h"
 #include "DRV.h"
 #include "FlashAccess.h"
 
  
-//PreferenceWriter prefs(6);
 
 GPIOStruct gpio;
 ControllerStruct controller;
@@ -48,7 +44,10 @@ COMStruct com;
 UnbufferedSerial pc(PA_2, PA_3);
 
 
-CAN          can(PB_8, PB_9, 1000000);      // CAN Rx pin name, CAN Tx pin name
+CAN          can(PB_5, PB_6, 1000000);      // CAN Rx pin name, CAN Tx pin name
+//TODO: Replace with something like HAL_FDCAN_Init from stm32g4xx_hal_fdcan.c?
+
+
 CANMessage   rxMsg;
 CANMessage   txMsg;
 
@@ -59,6 +58,7 @@ DigitalOut drv_cs(PA_4);
 DRV832x drv(&drv_spi, &drv_cs);
 
 PositionSensorAM5147 spi(16384, 0.0, NPP);  
+
 
 volatile int count_sm = 0; //state machine counter. Renamed from count to avoid conflict
 volatile int state = REST_MODE;
