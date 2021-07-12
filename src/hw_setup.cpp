@@ -61,7 +61,7 @@ void Init_ADC(void){
      ADC2->CR |= ADC_CR_ADVREGEN;
      ADC3->CR |= ADC_CR_ADVREGEN;
 
-     wait_us(LL_ADC_DELAY_INTERNAL_REGUL_STAB_US); //wait for regulator start-up time
+     //wait_us(LL_ADC_DELAY_INTERNAL_REGUL_STAB_US); //wait for regulator start-up time
 
      ADC1->ISR |= ADC_ISR_ADRDY; //clear adrdy bits [sic, it is cleared by writing a '1' according to ref. manual]
      ADC2->ISR |= ADC_ISR_ADRDY;

@@ -452,8 +452,17 @@ int main() {
     controller.mode = 0;
     Init_All_HW(&gpio);                                                         // Setup PWM, ADC, GPIO
     wait_us(100);
+
+    
     
     gpio.enable->write(1);
+
+    gpio.led1->write(1);
+    wait_us(1000000);
+    gpio.led1->write(0);
+    wait_us(3000000);
+    gpio.led1->write(1);
+
     wait_us(100);
     drv.calibrate();
     wait_us(100);
@@ -513,6 +522,7 @@ int main() {
     memcpy(&lut, &ENCODER_LUT, sizeof(lut));
     spi.WriteLUT(lut);                                                          // Set potision sensor nonlinearity lookup table
     init_controller_params(&controller);
+    
     
 
     pc.baud(921600);    
