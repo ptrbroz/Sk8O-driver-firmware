@@ -1,3 +1,8 @@
+# IMPORTANT: This repository is no longer developed!
+
+Instead of adapting mbed firmware, I decided to port Ben Katz's new version of firmware. See repo https://github.com/ptrbroz/motorcontrol_stm32g474re .
+
+
 # Sk8O-driver-firmware
  
 Firmware for Sk8O motor driver - a new bldc driver board inspired by Ben Katz's HKC Driver Integrated.
